@@ -13,7 +13,7 @@ enum EnumLBCFrameSize { ms20 = 20, ms30 = 30 };
 
 /**
  * @brief Internet Low Bitrate Codec (iLBC)
- *
+ * @author Phil Schatzmann
  */
 class iLBC {
 public:
@@ -46,7 +46,6 @@ public:
   /// Decodes framesize of samples
   int decode(unsigned char *data, int16_t *samples, int mode) {
     int i;
-    float block[BLOCKL_MAX];
 
     // Validate Mode
     if (mode != 0 && mode != 1) {
