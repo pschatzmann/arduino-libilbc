@@ -1,7 +1,6 @@
 #pragma once
 
-#include <math.h>
-#include <string.h>
+#include <stdint.h>
 
 extern "C" {
   #include "ilbc_src/iLBC_decode.h"
@@ -12,7 +11,7 @@ extern "C" {
 enum EnumLBCFrameSize { ms20 = 20, ms30 = 30 };
 
 /**
- * @brief Internet Low Bitrate Codec (iLBC)
+ * @brief Internet Low Bitrate Codec (iLBC) which is expecting int16_t samples
  * @author Phil Schatzmann
  */
 class iLBC {
@@ -30,11 +29,10 @@ public:
   int getEncodedBytes() { return g_enc_inst.no_of_bytes; }
 
   /// Encodes framesize of samples
-  int encode(int16_t *samples, unsigned char *data) {
-    int i;
+  int encode(int16_t *samples, uint8_t *data) {
 
     // Convert to float representaion of voice signal.
-    for (i = 0; i < g_enc_inst.blockl; i++) {
+    for (int i = 0; i < g_enc_inst.blockl; i++) {
       block[i] = samples[i];
     }
 
@@ -44,18 +42,12 @@ public:
   }
 
   /// Decodes framesize of samples
-  int decode(unsigned char *data, int16_t *samples, int mode) {
-    int i;
-
-    // Validate Mode
-    if (mode != 0 && mode != 1) {
-      return -1;
-    }
+  int decode(uint8_t *data, int16_t *samples, bool mode) {
 
     iLBC_decode(block, data, &g_dec_inst, mode);
 
     // Validate PCM16
-    for (i = 0; i < g_dec_inst.blockl; i++) {
+    for (int i = 0; i < g_dec_inst.blockl; i++) {
       float point;
 
       point = block[i];
