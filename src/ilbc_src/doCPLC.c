@@ -92,8 +92,12 @@
        float use_gain;
        float gain_comp, maxcc_comp, per, max_per;
        int i, pick, use_lag;
-       float ftmp, randvec[BLOCKL_MAX], pitchfact, energy;
-
+       float ftmp,  pitchfact, energy;
+#if ILBC_STACK_HACK
+       float *randvec = iLBCdec_inst->randvec;
+#else
+       float randvec[BLOCKL_MAX];
+#endif
        /* Packet Loss */
 
        if (PLI == 1) {

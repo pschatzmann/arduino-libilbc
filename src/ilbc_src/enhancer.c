@@ -271,12 +271,16 @@
        float alpha0/* (i) max smoothing energy fraction */
    ){
        int i,k;
-       float w00,w10,w11,A,B,C,*psseq,err,errs;
+       float w00,w10,w11,A,B,C,*psseq,err,errs, denom;
+#if ILBC_STACK_HACK_EXT
+       static float surround[BLOCKL_MAX]; 
+       static float wt[2*ENH_HL+1];      
+#else
        float surround[BLOCKL_MAX]; /* shape contributed by other than
                                       current */
-       float wt[2*ENH_HL+1];       /* waveform weighting to get
-                                      surround shape */
-       float denom;
+       float wt[2*ENH_HL+1];       /* waveform weighting to get float denom; */
+#endif
+       
 
        /* create shape of contribution from all waveforms except the
           current one */
@@ -465,8 +469,11 @@
                                   values valid */
        int periodl         /* (i) dimension of period and plocs */
    ){
+#if ILBC_STACK_HACK_EXT
+       static float sseq[(2*ENH_HL+1)*ENH_BLOCKL];
+#else
        float sseq[(2*ENH_HL+1)*ENH_BLOCKL];
-
+#endif
        /* get said second sequence of segments */
 
        getsseq(sseq,idata,idatal,centerStartPos,period,
@@ -525,9 +532,14 @@
        float cc, maxcc;
        float ftmp1, ftmp2;
        float *inPtr, *enh_bufPtr1, *enh_bufPtr2;
+#if ILBC_STACK_HACK
+       float *plc_pred = iLBCdec_inst->plc_pred;
+       float *lpState = iLBCdec_inst->lpState;
+       float *downsampled = iLBCdec_inst->downsampled;
+#else
        float plc_pred[ENH_BLOCKL];
-
        float lpState[6], downsampled[(ENH_NBLOCKS*ENH_BLOCKL+120)/2];
+#endif
        int inLen=ENH_NBLOCKS*ENH_BLOCKL+120;
        int start, plc_blockl, inlag;
 

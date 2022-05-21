@@ -31,7 +31,11 @@
        int cbveclen/* (i) Codebook vector length */
    ){
        int j, k, n, memInd, sFilt;
+#if ILBC_STACK_HACK_EXT
+       static float tmpbuf[CB_MEML];
+#else
        float tmpbuf[CB_MEML];
+#endif
        int base_size;
        int ilow, ihigh;
        float alfa, alfa1;

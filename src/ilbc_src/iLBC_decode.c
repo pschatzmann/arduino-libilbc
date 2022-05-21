@@ -142,7 +142,13 @@
                                               first 0 if that part
                                               comes last */
    ){
+#if ILBC_STACK_HACK
+
+        float* reverseDecresidual = iLBCdec_inst->reverseDecresidual;
+        float* mem = iLBCdec_inst->mem;
+#else
        float reverseDecresidual[BLOCKL_MAX], mem[CB_MEML];
+#endif
        int k, meml_gotten, Nfor, Nback, i;
        int diff, start_pos;
        int subcount, subframe;
@@ -331,26 +337,47 @@
        int mode                    /* (i) 0: bad packet, PLC,
                                               1: normal */
    ){
+#if ILBC_STACK_HACK
+       float *data = iLBCdec_inst->data;
+       float *lsfdeq = iLBCdec_inst->lsfdeq;
+       float *PLCresidual = iLBCdec_inst->PLCresidual;
+       float *PLClpc = iLBCdec_inst->PLClpc;
+       float *zeros = iLBCdec_inst->zeros;
+       float *one = iLBCdec_inst->one;
+
+       int *gain_index=iLBCdec_inst->gain_index;
+       int *extra_gain_index=iLBCdec_inst->extra_gain_index;
+       int *cb_index = iLBCdec_inst->cb_index;
+       int *extra_cb_index = iLBCdec_inst->extra_cb_index;
+       int *lsf_i = iLBCdec_inst->lsf_i;
+       int *idxVec = iLBCdec_inst->idxVec;
+       float *weightdenum = iLBCdec_inst->weightdenum;
+       float *syntdenum = iLBCdec_inst->syntdenum;
+       float *decresidual = iLBCdec_inst->decresidual;
+#else
        float data[BLOCKL_MAX];
        float lsfdeq[LPC_FILTERORDER*LPC_N_MAX];
        float PLCresidual[BLOCKL_MAX], PLClpc[LPC_FILTERORDER + 1];
        float zeros[BLOCKL_MAX], one[LPC_FILTERORDER + 1];
-       int k, i, start, idxForMax, pos, lastpart, ulp;
-       int lag, ilag;
-       float cc, maxcc;
-       int idxVec[STATE_LEN];
-       int check;
+
        int gain_index[NASUB_MAX*CB_NSTAGES],
            extra_gain_index[CB_NSTAGES];
        int cb_index[CB_NSTAGES*NASUB_MAX], extra_cb_index[CB_NSTAGES];
        int lsf_i[LSF_NSPLIT*LPC_N_MAX];
+       int idxVec[STATE_LEN];
+       float weightdenum[(LPC_FILTERORDER + 1)*NSUB_MAX];
+       float syntdenum[NSUB_MAX*(LPC_FILTERORDER+1)];
+       float decresidual[BLOCKL_MAX];
+
+#endif
+       int k, i, start, idxForMax, pos, lastpart, ulp;
+       int lag, ilag;
+       float cc, maxcc;
+       int check;
        int state_first;
        int last_bit;
        unsigned char *pbytes;
-       float weightdenum[(LPC_FILTERORDER + 1)*NSUB_MAX];
        int order_plus_one;
-       float syntdenum[NSUB_MAX*(LPC_FILTERORDER+1)];
-       float decresidual[BLOCKL_MAX];
 
        if (mode>0) { /* the data are good */
 

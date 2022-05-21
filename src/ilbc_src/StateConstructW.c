@@ -34,11 +34,17 @@
        float *out,         /* (o) the decoded state vector */
        int len             /* (i) length of a state vector */
    ){
-       float maxVal, tmpbuf[LPC_FILTERORDER+2*STATE_LEN], *tmp,
-           numerator[LPC_FILTERORDER+1];
-       float foutbuf[LPC_FILTERORDER+2*STATE_LEN], *fout;
+#if ILBC_STACK_HACK_EXT
+       static float tmpbuf[LPC_FILTERORDER+2*STATE_LEN];
+       static float numerator[LPC_FILTERORDER+1];
+       static float foutbuf[LPC_FILTERORDER+2*STATE_LEN];
+#else
+       float tmpbuf[LPC_FILTERORDER+2*STATE_LEN];
+       float numerator[LPC_FILTERORDER+1];
+       float foutbuf[LPC_FILTERORDER+2*STATE_LEN];
+#endif
+       float maxVal, *fout,*tmp;
        int k,tmpi;
-
        /* decoding of the maximum value */
 
        maxVal = state_frgqTbl[idxForMax];

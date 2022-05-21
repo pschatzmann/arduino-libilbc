@@ -131,10 +131,16 @@
        int state_first     /* (i) position of start state in the
                                   80 vec */
    ){
-       float dtmp, maxVal;
+       float dtmp, maxVal, *tmp, *fout;
+#if ILBC_STACK_HACK
+        float *tmpbuf = iLBCenc_inst->tmpbuf;
+        float *numerator = iLBCenc_inst->numerator;
+        float *foutbuf = iLBCenc_inst->foutbuf;
+#else
        float tmpbuf[LPC_FILTERORDER+2*STATE_SHORT_LEN_30MS];
-       float *tmp, numerator[1+LPC_FILTERORDER];
-       float foutbuf[LPC_FILTERORDER+2*STATE_SHORT_LEN_30MS], *fout;
+       float numerator[1+LPC_FILTERORDER];
+       float foutbuf[LPC_FILTERORDER+2*STATE_SHORT_LEN_30MS];
+#endif
        int k;
        float qmax, scal;
 

@@ -94,30 +94,48 @@
                                               state */
    ){
 
+       int start, idxForMax; 
+#if ILBC_STACK_HACK
+       float *data = iLBCenc_inst->data;
+       float *residual = iLBCenc_inst->residual;
+       float *reverseResidual = iLBCenc_inst->reverseResidual;
+       float *reverseDecresidual = iLBCenc_inst->reverseDecresidual;
+       float *mem = iLBCenc_inst->mem;
+       int *idxVec= iLBCenc_inst->idxVec;
+
+       int *gain_index = iLBCenc_inst->gain_index;
+       int *extra_gain_index = iLBCenc_inst->extra_gain_index;
+       int *cb_index = iLBCenc_inst->cb_index;
+       int *extra_cb_index = iLBCenc_inst->extra_cb_index;
+       int *lsf_i = iLBCenc_inst->lsf_i;
+       float *weightState =  iLBCenc_inst->weightState;
+       float *syntdenum = iLBCenc_inst->syntdenum;
+       float *weightdenum = iLBCenc_inst->weightdenum;
+       float *decresidual = iLBCenc_inst->decresidual;
+
+#else
        float data[BLOCKL_MAX];
        float residual[BLOCKL_MAX], reverseResidual[BLOCKL_MAX];
-
-       int start, idxForMax, idxVec[STATE_LEN];
-
-
-
-
-
        float reverseDecresidual[BLOCKL_MAX], mem[CB_MEML];
-       int n, k, meml_gotten, Nfor, Nback, i, pos;
+       int idxVec[STATE_LEN];
+
        int gain_index[CB_NSTAGES*NASUB_MAX],
            extra_gain_index[CB_NSTAGES];
        int cb_index[CB_NSTAGES*NASUB_MAX],extra_cb_index[CB_NSTAGES];
        int lsf_i[LSF_NSPLIT*LPC_N_MAX];
+       float weightState[LPC_FILTERORDER];
+       float syntdenum[NSUB_MAX*(LPC_FILTERORDER+1)];
+       float weightdenum[NSUB_MAX*(LPC_FILTERORDER+1)];
+       float decresidual[BLOCKL_MAX];
+
+#endif
+
+       int n, k, meml_gotten, Nfor, Nback, i, pos;
        unsigned char *pbytes;
        int diff, start_pos, state_first;
        float en1, en2;
        int index, ulp, firstpart;
        int subcount, subframe;
-       float weightState[LPC_FILTERORDER];
-       float syntdenum[NSUB_MAX*(LPC_FILTERORDER+1)];
-       float weightdenum[NSUB_MAX*(LPC_FILTERORDER+1)];
-       float decresidual[BLOCKL_MAX];
 
        /* high pass filtering of input signal if such is not done
               prior to calling this function */
@@ -151,9 +169,6 @@
        diff = STATE_LEN - iLBCenc_inst->state_short_len;
        en1 = 0;
        index = (start-1)*SUBL;
-
-
-
 
 
        for (i = 0; i < iLBCenc_inst->state_short_len; i++) {

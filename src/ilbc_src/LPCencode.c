@@ -32,10 +32,16 @@
                            /* (i/o) the encoder state structure */
    ){
        int k, is;
+#if ILBC_STACK_HACK
+       float *temp = iLBCenc_inst->temp;
+       float *lp = iLBCenc_inst->lp;
+       float *lp2 = iLBCenc_inst->lp2;
+       float *r = iLBCenc_inst->r;
+#else
        float temp[BLOCKL_MAX], lp[LPC_FILTERORDER + 1];
        float lp2[LPC_FILTERORDER + 1];
        float r[LPC_FILTERORDER + 1];
-
+#endif
        is=LPC_LOOKBACK+BLOCKL_MAX-iLBCenc_inst->blockl;
        memcpy(iLBCenc_inst->lpc_buffer+is,data,
            iLBCenc_inst->blockl*sizeof(float));

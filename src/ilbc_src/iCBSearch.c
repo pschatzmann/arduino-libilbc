@@ -44,17 +44,30 @@
    ){
        int i, j, icount, stage, best_index, range, counter;
        float max_measure, gain, measure, crossDot, ftmp;
-       float gains[CB_NSTAGES];
-       float target[SUBL];
        int base_index, sInd, eInd, base_size;
        int sIndAug=0, eIndAug=0;
+       float *pp, *ppi=0, *ppo=0, *ppe=0;
+       float tene, cene;
+
+#if ILBC_STACK_HACK
+
+       float *gains = iLBCenc_inst->gains;
+       float *target= iLBCenc_inst->target;
+       float *buf= iLBCenc_inst->buf;
+       float *invenergy= iLBCenc_inst->invenergy;
+       float *energy = iLBCenc_inst->energy;
+       float *cbvectors= iLBCenc_inst->cbvectors;
+       float *cvec= iLBCenc_inst->cvec;
+       float *aug_vec= iLBCenc_inst->aug_vec;
+#else
+       float gains[CB_NSTAGES];
+       float target[SUBL];
        float buf[CB_MEML+SUBL+2*LPC_FILTERORDER];
        float invenergy[CB_EXPAND*128], energy[CB_EXPAND*128];
-       float *pp, *ppi=0, *ppo=0, *ppe=0;
        float cbvectors[CB_MEML];
-       float tene, cene, cvec[SUBL];
+       float cvec[SUBL];
        float aug_vec[SUBL];
-
+#endif
        memset(cvec,0,SUBL*sizeof(float));
 
        /* Determine size of codebook sections */

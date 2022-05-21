@@ -14,6 +14,16 @@
    #ifndef __iLBC_ILBCDEFINE_H
    #define __iLBC_ILBCDEFINE_H
 
+// Use preallocated heap instead of stack for large arrays on Microcontrollers
+#ifndef ILBC_STACK_HACK
+# if defined(ARDUINO)
+   #define ILBC_STACK_HACK         1
+   #define ILBC_STACK_HACK_EXT     1
+# else
+   #define ILBC_STACK_HACK         0
+   #define ILBC_STACK_HACK_EXT     0
+# endif
+#endif
    /* general codec settings */
 
    #define FS                      (float)8000.0
@@ -109,9 +119,10 @@
    /* help parameters */
 
    #define FLOAT_MAX               (float)1.0e37
-   #ifndef EPS
+//   #ifndef EPS
+#undef EPS
    #define EPS                     (float)2.220446049250313e-016
-   #endif
+//   #endif
    #ifndef PI
    #define PI                      (float)3.14159265358979323846
    #endif
@@ -168,6 +179,44 @@
        /* state of input HP filter */
        float hpimem[4];
 
+#if ILBC_STACK_HACK
+
+// decode
+       float data[BLOCKL_MAX];
+       float residual[BLOCKL_MAX], reverseResidual[BLOCKL_MAX];
+       int idxVec[STATE_LEN];
+
+       int gain_index[CB_NSTAGES*NASUB_MAX],
+           extra_gain_index[CB_NSTAGES];
+       int cb_index[CB_NSTAGES*NASUB_MAX],extra_cb_index[CB_NSTAGES];
+       int lsf_i[LSF_NSPLIT*LPC_N_MAX];
+       float weightState[LPC_FILTERORDER];
+       float syntdenum[NSUB_MAX*(LPC_FILTERORDER+1)];
+       float weightdenum[NSUB_MAX*(LPC_FILTERORDER+1)];
+       float decresidual[BLOCKL_MAX];
+       float reverseDecresidual[BLOCKL_MAX], mem[CB_MEML];
+
+// search
+       float gains[CB_NSTAGES];
+       float target[SUBL];
+       float buf[CB_MEML+SUBL+2*LPC_FILTERORDER];
+       float invenergy[CB_EXPAND*128], energy[CB_EXPAND*128];
+       float cbvectors[CB_MEML];
+       float cvec[SUBL];
+       float aug_vec[SUBL];
+
+// state search
+       float tmpbuf[LPC_FILTERORDER+2*STATE_SHORT_LEN_30MS];
+       float numerator[1+LPC_FILTERORDER];
+       float foutbuf[LPC_FILTERORDER+2*STATE_SHORT_LEN_30MS];
+
+// simple analysis
+       float temp[BLOCKL_MAX], lp[LPC_FILTERORDER + 1];
+       float lp2[LPC_FILTERORDER + 1];
+       float r[LPC_FILTERORDER + 1];
+
+#endif
+
    } iLBC_Enc_Inst_t;
 
    /* type definition decoder instance */
@@ -216,6 +265,31 @@
        int use_enhancer;
        float enh_buf[ENH_BUFL];
        float enh_period[ENH_NBLOCKS_TOT];
+
+#if ILBC_STACK_HACK
+       // Decode
+       float data[BLOCKL_MAX];
+       float lsfdeq[LPC_FILTERORDER*LPC_N_MAX];
+       float PLCresidual[BLOCKL_MAX], PLClpc[LPC_FILTERORDER + 1];
+       float zeros[BLOCKL_MAX], one[LPC_FILTERORDER + 1];
+
+       float reverseDecresidual[BLOCKL_MAX], mem[CB_MEML];
+       int gain_index[NASUB_MAX*CB_NSTAGES],
+           extra_gain_index[CB_NSTAGES];
+       int cb_index[CB_NSTAGES*NASUB_MAX], extra_cb_index[CB_NSTAGES];
+       int lsf_i[LSF_NSPLIT*LPC_N_MAX];
+       int idxVec[STATE_LEN];
+       float weightdenum[(LPC_FILTERORDER + 1)*NSUB_MAX];
+       float syntdenum[NSUB_MAX*(LPC_FILTERORDER+1)];
+       float decresidual[BLOCKL_MAX];
+
+//     enhancer
+       float plc_pred[ENH_BLOCKL];
+       float lpState[6], downsampled[(ENH_NBLOCKS*ENH_BLOCKL+120)/2];
+//     doThePLC
+       float randvec[BLOCKL_MAX];
+
+#endif
 
    } iLBC_Dec_Inst_t;
 
